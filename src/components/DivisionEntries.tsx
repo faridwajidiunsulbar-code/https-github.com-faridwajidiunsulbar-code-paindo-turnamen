@@ -18,9 +18,10 @@ interface DivisionEntriesProps {
   division: Division;
   isDouble: boolean;
   onUpdateDivision: (updated: Division) => void;
+  isAdmin?: boolean;
 }
 
-export default function DivisionEntries({ division, isDouble, onUpdateDivision }: DivisionEntriesProps) {
+export default function DivisionEntries({ division, isDouble, onUpdateDivision, isAdmin = true }: DivisionEntriesProps) {
   const [name1, setName1] = useState('');
   const [name2, setName2] = useState('');
   const [affiliation, setAffiliation] = useState('');
@@ -301,7 +302,8 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
             <select
               value={division.settings.targetScore}
               onChange={(e) => updateSetting('targetScore', parseInt(e.target.value) as 11 | 15 | 21)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white"
+              disabled={!isAdmin}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
             >
               <option value="11">11 Poin</option>
               <option value="15">15 Poin</option>
@@ -316,22 +318,24 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
               <button
                 type="button"
                 onClick={() => updateSetting('winByTwo', true)}
+                disabled={!isAdmin}
                 className={`flex-1 py-2 text-sm font-extrabold rounded-lg border transition ${
                   division.settings.winByTwo
                     ? 'bg-navy text-neon border-navy card-shadow'
                     : 'bg-white text-slate-600 border-slate-250 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-75 disabled:cursor-not-allowed`}
               >
                 Ya
               </button>
               <button
                 type="button"
                 onClick={() => updateSetting('winByTwo', false)}
+                disabled={!isAdmin}
                 className={`flex-1 py-2 text-sm font-extrabold rounded-lg border transition ${
                   !division.settings.winByTwo
                     ? 'bg-navy text-neon border-navy card-shadow'
                     : 'bg-white text-slate-600 border-slate-250 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-75 disabled:cursor-not-allowed`}
               >
                 Tidak
               </button>
@@ -344,7 +348,8 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
             <select
               value={division.settings.playersPerGroup}
               onChange={(e) => updateSetting('playersPerGroup', parseInt(e.target.value) as 3 | 4 | 5)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white"
+              disabled={!isAdmin}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
             >
               <option value="3">3 Peserta per Grup</option>
               <option value="4">4 Peserta per Grup</option>
@@ -358,7 +363,8 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
             <select
               value={division.settings.playersQualifyingPerGroup}
               onChange={(e) => updateSetting('playersQualifyingPerGroup', parseInt(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white"
+              disabled={!isAdmin}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
             >
               <option value="1">Peringkat 1 Terbaik</option>
               <option value="2">Peringkat 1 & 2 Terbaik</option>
@@ -372,7 +378,8 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
             <select
               value={division.settings.bracketSize}
               onChange={(e) => updateSetting('bracketSize', parseInt(e.target.value) as 4 | 8 | 16 | 32)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white"
+              disabled={!isAdmin}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-700 bg-white disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
             >
               <option value="4">Semifinal (4 Besar)</option>
               <option value="8">Perempat Final (8 Besar)</option>
@@ -388,11 +395,12 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
               <button
                 type="button"
                 onClick={() => updateSetting('wildcardActive', true)}
+                disabled={!isAdmin}
                 className={`flex-1 py-2 text-sm font-extrabold rounded-lg border transition ${
                   division.settings.wildcardActive
                     ? 'bg-navy text-neon border-navy card-shadow'
                     : 'bg-white text-slate-600 border-slate-250 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-75 disabled:cursor-not-allowed`}
                 title="Mengambil runner-up/peringkat 3 terbaik dari lintas grup jika kuota bracket belum terpenuhi"
               >
                 Aktif
@@ -400,11 +408,12 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
               <button
                 type="button"
                 onClick={() => updateSetting('wildcardActive', false)}
+                disabled={!isAdmin}
                 className={`flex-1 py-2 text-sm font-extrabold rounded-lg border transition ${
                   !division.settings.wildcardActive
                     ? 'bg-navy text-neon border-navy card-shadow'
                     : 'bg-white text-slate-600 border-slate-250 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-75 disabled:cursor-not-allowed`}
               >
                 Nonaktif
               </button>
@@ -418,22 +427,24 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
               <button
                 type="button"
                 onClick={() => updateSetting('byeActive', true)}
+                disabled={!isAdmin}
                 className={`flex-1 py-2 text-sm font-extrabold rounded-lg border transition ${
                   division.settings.byeActive
                     ? 'bg-navy text-neon border-navy card-shadow'
                     : 'bg-white text-slate-600 border-slate-250 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-75 disabled:cursor-not-allowed`}
               >
                 Aktif
               </button>
               <button
                 type="button"
                 onClick={() => updateSetting('byeActive', false)}
+                disabled={!isAdmin}
                 className={`flex-1 py-2 text-sm font-extrabold rounded-lg border transition ${
                   !division.settings.byeActive
                     ? 'bg-navy text-neon border-navy card-shadow'
                     : 'bg-white text-slate-600 border-slate-250 hover:bg-slate-50'
-                }`}
+                } disabled:opacity-75 disabled:cursor-not-allowed`}
               >
                 Nonaktif
               </button>
@@ -452,7 +463,7 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
       </section>
 
       {/* SECTION: POOL PEMAIN INTERNAL PAINDO */}
-      {isDouble && (
+      {isAdmin && isDouble && (
         <section className="bg-slate-50 rounded-2xl border border-slate-200 p-6 card-shadow animate-fade-in" id="paindo-pool-section">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <div>
@@ -566,64 +577,33 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" id="entries-grid-panel">
         
         {/* ADD ENTRY FORM */}
-        <div className="lg:col-span-1" id="add-entry-panel">
-          <div className="bg-white rounded-2xl border border-slate-150 p-6 card-shadow sticky top-4">
-            <h3 className="text-base font-extrabold text-navy mb-4 flex items-center gap-2">
-              <Plus className="h-5 w-5 text-neon stroke-navy fill-neon" />
-              Daftarkan Peserta Baru
-            </h3>
+        {isAdmin && (
+          <div className="lg:col-span-1" id="add-entry-panel">
+            <div className="bg-white rounded-2xl border border-slate-150 p-6 card-shadow sticky top-4">
+              <h3 className="text-base font-extrabold text-navy mb-4 flex items-center gap-2">
+                <Plus className="h-5 w-5 text-neon stroke-navy fill-neon" />
+                Daftarkan Peserta Baru
+              </h3>
 
-            <form onSubmit={handleAddEntry} className="space-y-4" id="entry-form">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
-                  {isDouble ? 'Nama Pemain 1' : 'Nama Pemain'}
-                </label>
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    id="entry-player-1-input"
-                    required
-                    value={name1}
-                    onChange={(e) => setName1(e.target.value)}
-                    placeholder="Nama Lengkap"
-                    className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-800 transition"
-                  />
-                  <select
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setName1(e.target.value);
-                        e.target.value = ''; // reset
-                      }
-                    }}
-                    className="px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-navy/15 cursor-pointer hover:bg-slate-100 transition"
-                  >
-                    <option value="">Pilih...</option>
-                    {poolPlayers.map(p => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {isDouble && (
-                <div className="space-y-1 animate-slide-down">
+              <form onSubmit={handleAddEntry} className="space-y-4" id="entry-form">
+                <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
-                    Nama Pemain 2 (Partner)
+                    {isDouble ? 'Nama Pemain 1' : 'Nama Pemain'}
                   </label>
                   <div className="flex gap-1.5">
                     <input
                       type="text"
-                      id="entry-player-2-input"
+                      id="entry-player-1-input"
                       required
-                      value={name2}
-                      onChange={(e) => setName2(e.target.value)}
-                      placeholder="Nama Pasangan"
+                      value={name1}
+                      onChange={(e) => setName1(e.target.value)}
+                      placeholder="Nama Lengkap"
                       className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-800 transition"
                     />
                     <select
                       onChange={(e) => {
                         if (e.target.value) {
-                          setName2(e.target.value);
+                          setName1(e.target.value);
                           e.target.value = ''; // reset
                         }
                       }}
@@ -636,54 +616,87 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
                     </select>
                   </div>
                 </div>
-              )}
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
-                  Asal Klub / Kota (Opsional)
-                </label>
-                <input
-                  type="text"
-                  id="entry-affiliation-input"
-                  value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
-                  placeholder="Klub / Daerah Asal"
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-800 transition"
-                />
-              </div>
-
-              <button
-                type="submit"
-                id="submit-entry-button"
-                className="w-full py-3 bg-navy hover:bg-navy-light text-neon rounded-lg font-extrabold transition text-sm flex items-center justify-center gap-2 card-shadow"
-              >
-                <Plus className="h-4 w-4 text-neon" /> Daftar Peserta
-              </button>
-
-              {isDouble && (
-                <div className="pt-4 border-t border-slate-100 mt-4">
-                  <div className="text-xs font-semibold text-slate-400 mb-2 text-center uppercase tracking-wider">
-                    Pilihan Auto-Generate
+                {isDouble && (
+                  <div className="space-y-1 animate-slide-down">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                      Nama Pemain 2 (Partner)
+                    </label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        id="entry-player-2-input"
+                        required
+                        value={name2}
+                        onChange={(e) => setName2(e.target.value)}
+                        placeholder="Nama Pasangan"
+                        className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-800 transition"
+                      />
+                      <select
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setName2(e.target.value);
+                            e.target.value = ''; // reset
+                          }
+                        }}
+                        className="px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-navy/15 cursor-pointer hover:bg-slate-100 transition"
+                      >
+                        <option value="">Pilih...</option>
+                        {poolPlayers.map(p => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleGenerateUser12Pairs}
-                    className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 hover:border-emerald-300 rounded-lg font-extrabold transition text-xs flex items-center justify-center gap-2"
-                    id="generate-12-pairs-button"
-                  >
-                    ⚡ Auto-Generate 12 Pasang Ganda Putra Open
-                  </button>
-                  <p className="text-[10px] text-slate-400 text-center mt-1">
-                    Mengisi otomatis 12 pasang pemain (Farid, Iswan, dkk)
-                  </p>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                    Asal Klub / Kota (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    id="entry-affiliation-input"
+                    value={affiliation}
+                    onChange={(e) => setAffiliation(e.target.value)}
+                    placeholder="Klub / Daerah Asal"
+                    className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 text-sm text-slate-800 transition"
+                  />
                 </div>
-              )}
-            </form>
+
+                <button
+                  type="submit"
+                  id="submit-entry-button"
+                  className="w-full py-3 bg-navy hover:bg-navy-light text-neon rounded-lg font-extrabold transition text-sm flex items-center justify-center gap-2 card-shadow"
+                >
+                  <Plus className="h-4 w-4 text-neon" /> Daftar Peserta
+                </button>
+
+                {isDouble && (
+                  <div className="pt-4 border-t border-slate-100 mt-4">
+                    <div className="text-xs font-semibold text-slate-400 mb-2 text-center uppercase tracking-wider">
+                      Pilihan Auto-Generate
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleGenerateUser12Pairs}
+                      className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 hover:border-emerald-300 rounded-lg font-extrabold transition text-xs flex items-center justify-center gap-2"
+                      id="generate-12-pairs-button"
+                    >
+                      ⚡ Auto-Generate 12 Pasang Ganda Putra Open
+                    </button>
+                    <p className="text-[10px] text-slate-400 text-center mt-1">
+                      Mengisi otomatis 12 pasang pemain (Farid, Iswan, dkk)
+                    </p>
+                  </div>
+                )}
+              </form>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* LIST OF ENTRIES */}
-        <div className="lg:col-span-2" id="entries-list-panel">
+        <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"} id="entries-list-panel">
           <div className="bg-white rounded-2xl border border-slate-150 p-6 card-shadow">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-extrabold text-navy flex items-center gap-2">
@@ -706,7 +719,7 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
                       <th className="p-3 w-12 text-center">No</th>
                       <th className="p-3">Pemain</th>
                       <th className="p-3">Afiliasi/Klub</th>
-                      <th className="p-3 w-28 text-center">Aksi</th>
+                      {isAdmin && <th className="p-3 w-28 text-center">Aksi</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-150 text-sm">
@@ -795,46 +808,48 @@ export default function DivisionEntries({ division, isDouble, onUpdateDivision }
                             )}
                           </td>
                           
-                          <td className="p-3 text-center">
-                            {isEditing ? (
-                              <div className="flex items-center justify-center gap-1">
-                                <button
-                                  onClick={() => saveEdit(entry.id)}
-                                  className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition"
-                                  title="Simpan perubahan"
-                                  id={`save-edit-button-${entry.id}`}
-                                >
-                                  <Check className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => setEditingEntryId(null)}
-                                  className="p-1.5 bg-slate-50 text-slate-500 rounded-lg border border-slate-200 hover:bg-slate-100 transition text-xs"
-                                  id={`cancel-edit-button-${entry.id}`}
-                                >
-                                  Batal
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center gap-1.5">
-                                <button
-                                  onClick={() => startEdit(entry)}
-                                  className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-50 rounded-lg transition"
-                                  title="Edit peserta"
-                                  id={`edit-entry-button-${entry.id}`}
-                                >
-                                  <Edit2 className="h-4 w-4 text-navy" />
-                                </button>
-                                <button
-                                  onClick={() => removeEntry(entry.id)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition"
-                                  title="Hapus peserta"
-                                  id={`delete-entry-button-${entry.id}`}
-                                >
-                                  <Trash2 className="h-4 w-4 text-rose-500" />
-                                </button>
-                              </div>
-                            )}
-                          </td>
+                          {isAdmin && (
+                            <td className="p-3 text-center">
+                              {isEditing ? (
+                                <div className="flex items-center justify-center gap-1">
+                                  <button
+                                    onClick={() => saveEdit(entry.id)}
+                                    className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition"
+                                    title="Simpan perubahan"
+                                    id={`save-edit-button-${entry.id}`}
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingEntryId(null)}
+                                    className="p-1.5 bg-slate-50 text-slate-500 rounded-lg border border-slate-200 hover:bg-slate-100 transition text-xs"
+                                    id={`cancel-edit-button-${entry.id}`}
+                                  >
+                                    Batal
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <button
+                                    onClick={() => startEdit(entry)}
+                                    className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-50 rounded-lg transition"
+                                    title="Edit peserta"
+                                    id={`edit-entry-button-${entry.id}`}
+                                  >
+                                    <Edit2 className="h-4 w-4 text-navy" />
+                                  </button>
+                                  <button
+                                    onClick={() => removeEntry(entry.id)}
+                                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition"
+                                    title="Hapus peserta"
+                                    id={`delete-entry-button-${entry.id}`}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-rose-500" />
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       );
                     })}

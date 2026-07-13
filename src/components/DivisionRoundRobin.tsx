@@ -11,9 +11,10 @@ import { Award, Check, Eye, Edit3, Circle, ClipboardCheck, Trophy, RefreshCw, X,
 interface DivisionRoundRobinProps {
   division: Division;
   onUpdateDivision: (updated: Division) => void;
+  isAdmin?: boolean;
 }
 
-export default function DivisionRoundRobin({ division, onUpdateDivision }: DivisionRoundRobinProps) {
+export default function DivisionRoundRobin({ division, onUpdateDivision, isAdmin = true }: DivisionRoundRobinProps) {
   const { entries, groups, roundRobinMatches, settings } = division;
 
   // Selected Group Filter
@@ -379,33 +380,41 @@ export default function DivisionRoundRobin({ division, onUpdateDivision }: Divis
                             <span className="text-slate-400">-</span>
                             <span>{match.score2}</span>
                           </div>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => openScoringModal(match)}
-                              className="p-1.5 text-slate-400 hover:text-navy rounded transition bg-slate-50 border border-slate-200"
-                              title="Edit Skor"
-                              id={`edit-score-button-${match.id}`}
-                            >
-                              <Edit3 className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => resetMatchScore(match.id)}
-                              className="p-1.5 text-slate-400 hover:text-rose-500 rounded transition bg-slate-50 border border-slate-200"
-                              title="Hapus Skor"
-                              id={`reset-score-button-${match.id}`}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                          {isAdmin && (
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => openScoringModal(match)}
+                                className="p-1.5 text-slate-400 hover:text-navy rounded transition bg-slate-50 border border-slate-200"
+                                title="Edit Skor"
+                                id={`edit-score-button-${match.id}`}
+                              >
+                                <Edit3 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => resetMatchScore(match.id)}
+                                className="p-1.5 text-slate-400 hover:text-rose-500 rounded transition bg-slate-50 border border-slate-200"
+                                title="Hapus Skor"
+                                id={`reset-score-button-${match.id}`}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <button
-                          onClick={() => openScoringModal(match)}
-                          className="px-3.5 py-1.5 bg-neon/15 hover:bg-navy text-navy hover:text-neon rounded-lg border border-neon/30 hover:border-navy text-xs font-extrabold transition card-shadow"
-                          id={`score-match-button-${match.id}`}
-                        >
-                          Input Skor
-                        </button>
+                        isAdmin ? (
+                          <button
+                            onClick={() => openScoringModal(match)}
+                            className="px-3.5 py-1.5 bg-neon/15 hover:bg-navy text-navy hover:text-neon rounded-lg border border-neon/30 hover:border-navy text-xs font-extrabold transition card-shadow"
+                            id={`score-match-button-${match.id}`}
+                          >
+                            Input Skor
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400 bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200 font-bold">
+                            Belum Dimainkan
+                          </span>
+                        )
                       )}
                     </div>
 

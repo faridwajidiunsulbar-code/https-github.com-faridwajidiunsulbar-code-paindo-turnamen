@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { Tournament, Division } from '../types';
-import { Trophy, Award, Medal, Users, Calendar, MapPin, CheckCircle, Clock } from 'lucide-react';
+import { Trophy, Award, Medal, Users, Calendar, MapPin, CheckCircle, Clock, Download } from 'lucide-react';
+import { exportTournamentToPDF } from '../utils/pdfExport';
 
 interface OverallSummaryProps {
   tournament: Tournament;
@@ -37,38 +38,51 @@ export default function OverallSummary({ tournament, onNavigateToDivision }: Ove
           <Trophy className="h-96 w-96 text-neon" />
         </div>
 
-        <div className="space-y-4 max-w-3xl relative z-10">
-          <span className="inline-block px-3 py-1 bg-neon/15 text-neon text-xs font-black rounded-full uppercase tracking-wider">
-            Tournament Dashboard Rekapitulasi
-          </span>
-          <h2 className="text-3xl font-black tracking-tight">{name || 'Nama Turnamen Belum Diisi'}</h2>
-          
-          <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-slate-300">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 text-neon" />
-              <span>{date ? new Date(date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Tanggal belum diatur'}</span>
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 relative z-10">
+          <div className="space-y-4 max-w-3xl">
+            <span className="inline-block px-3 py-1 bg-neon/15 text-neon text-xs font-black rounded-full uppercase tracking-wider">
+              Tournament Dashboard Rekapitulasi
+            </span>
+            <h2 className="text-3xl font-black tracking-tight">{name || 'Nama Turnamen Belum Diisi'}</h2>
+            
+            <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-slate-300">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-neon" />
+                <span>{date ? new Date(date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Tanggal belum diatur'}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-neon" />
+                <span>{location || 'Lokasi belum diatur'}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-neon" />
-              <span>{location || 'Lokasi belum diatur'}</span>
+
+            {/* Core numerical stats row */}
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-navy-light max-w-lg" id="summary-stats-counters">
+              <div className="space-y-1">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Total Divisi</span>
+                <div className="text-xl font-black text-white">{totalDivisions} <span className="text-xs text-slate-400 font-medium">Divisi</span></div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Selesai Dimainkan</span>
+                <div className="text-xl font-black text-neon">{finishedDivisions} <span className="text-xs text-slate-400 font-medium">Selesai</span></div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Total Peserta</span>
+                <div className="text-xl font-black text-white">{totalEntries} <span className="text-xs text-slate-400 font-medium">Entry</span></div>
+              </div>
             </div>
           </div>
 
-          {/* Core numerical stats row */}
-          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-navy-light max-w-lg" id="summary-stats-counters">
-            <div className="space-y-1">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Total Divisi</span>
-              <div className="text-xl font-black text-white">{totalDivisions} <span className="text-xs text-slate-400 font-medium">Divisi</span></div>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Selesai Dimainkan</span>
-              <div className="text-xl font-black text-neon">{finishedDivisions} <span className="text-xs text-slate-400 font-medium">Selesai</span></div>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Total Peserta</span>
-              <div className="text-xl font-black text-white">{totalEntries} <span className="text-xs text-slate-400 font-medium">Entry</span></div>
-            </div>
-          </div>
+          {/* Export PDF Button */}
+          <button
+            onClick={() => exportTournamentToPDF(tournament)}
+            className="flex items-center gap-2 px-5 py-3 bg-neon text-navy font-black text-xs uppercase tracking-wider rounded-xl transition duration-200 hover:bg-white hover:scale-105 shadow-md shrink-0 self-start border border-navy/10 cursor-pointer"
+            title="Ekspor Seluruh Data Hasil Akhir dan Pertandingan ke PDF"
+            id="export-pdf-hero-btn"
+          >
+            <Download className="h-4 w-4" />
+            <span>Ekspor PDF</span>
+          </button>
         </div>
       </div>
 

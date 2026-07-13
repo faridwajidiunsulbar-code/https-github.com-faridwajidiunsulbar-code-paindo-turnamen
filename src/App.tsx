@@ -22,6 +22,7 @@ import DivisionEntries from './components/DivisionEntries';
 import DivisionGroups from './components/DivisionGroups';
 import DivisionRoundRobin from './components/DivisionRoundRobin';
 import DivisionKnockout from './components/DivisionKnockout';
+import { exportTournamentToPDF } from './utils/pdfExport';
 
 // Icons
 import {
@@ -165,6 +166,8 @@ export default function App() {
           return () => clearTimeout(timer);
         } else {
           setIsSyncing('error');
+          const lastErr = (window as any).lastSupabaseError || 'Gagal sinkronisasi data turnamen ke cloud.';
+          showToast(`Gagal Sinkronisasi: ${lastErr}`, 'error');
         }
       };
       
@@ -309,6 +312,9 @@ export default function App() {
   const matchedEvent = currentDiv ? tournament.events.find(e => e.id === currentDiv.eventId) : null;
   const isDouble = matchedEvent ? matchedEvent.isDouble : true;
 
+  // Differentiate between Admin and Public/Viewer mode
+  const isAdmin = !tournament.ownerId || (user !== null && user.id === tournament.ownerId);
+
   return (
     <div className="min-h-screen bg-softbg flex flex-col md:flex-row text-slate-800 font-sans" id="app-container">
       
@@ -341,6 +347,21 @@ export default function App() {
             ) : (
               <span className="px-2 py-0.5 bg-slate-500/20 text-slate-400 border border-slate-500/30 text-[9px] font-bold rounded-full flex items-center gap-1">
                 <CloudOff className="h-2.5 w-2.5" /> Offline
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-navy-light/20 pt-2 pb-1">
+            <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">
+              Level Akses
+            </span>
+            {isAdmin ? (
+              <span className="px-2 py-0.5 bg-neon/20 text-neon border border-neon/30 text-[9px] font-black rounded-full flex items-center gap-1 uppercase tracking-wider">
+                ⚡ Mode Admin
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[9px] font-black rounded-full flex items-center gap-1 uppercase tracking-wider animate-pulse">
+                👁️ Mode Publik
               </span>
             )}
           </div>
@@ -511,7 +532,7 @@ export default function App() {
 
         {/* Sidebar Footer: Data control */}
         <div className="p-4 border-t border-navy-light/40 space-y-2 bg-navy-light/20" id="sidebar-footer">
-          {!user && (
+          {isAdmin && !user && (
             <button
               onClick={handleResetToDemo}
               className="w-full px-3 py-2 bg-navy-light hover:bg-navy-light/80 text-slate-300 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5"
@@ -520,13 +541,20 @@ export default function App() {
               <RotateCcw className="h-3.5 w-3.5 text-neon" /> Muat Ulang Data Demo
             </button>
           )}
-          <button
-            onClick={handleStartFresh}
-            className="w-full px-3 py-2 bg-neon/10 hover:bg-neon/20 text-neon rounded-lg text-[11px] font-bold border border-neon/30 transition flex items-center justify-center gap-1.5"
-            id="start-fresh-action"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> Buat Turnamen Baru
-          </button>
+          {isAdmin && (
+            <button
+              onClick={handleStartFresh}
+              className="w-full px-3 py-2 bg-neon/10 hover:bg-neon/20 text-neon rounded-lg text-[11px] font-bold border border-neon/30 transition flex items-center justify-center gap-1.5"
+              id="start-fresh-action"
+            >
+              <Sparkles className="h-3.5 w-3.5" /> Buat Turnamen Baru
+            </button>
+          )}
+          {!isAdmin && (
+            <div className="p-2 text-center text-[10px] text-slate-500 font-medium italic border border-dashed border-slate-700/40 rounded-lg">
+              Mode Lihat Saja. Masuk sebagai pembuat turnamen untuk mengedit.
+            </div>
+          )}
         </div>
 
       </aside>
@@ -550,6 +578,15 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3 text-xs text-slate-500 font-medium" id="top-navbar-stats">
+            <button
+              onClick={() => exportTournamentToPDF(tournament)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-navy hover:bg-navy-light text-neon font-extrabold rounded-lg text-xs transition duration-200 shadow-xs cursor-pointer"
+              title="Ekspor Seluruh Hasil & Hasil Pertandingan ke PDF"
+              id="export-pdf-top-btn"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Unduh PDF</span>
+            </button>
             {isSupabaseConfigured && (
               <button
                 onClick={handleShareTournament}
@@ -560,6 +597,11 @@ export default function App() {
                 <Share2 className="h-3.5 w-3.5" />
                 <span>Bagikan Link</span>
               </button>
+            )}
+            {!isAdmin && (
+              <span className="px-2.5 py-1 bg-amber-500/10 text-amber-600 border border-amber-200 rounded-full font-black text-[10px] uppercase tracking-wider flex items-center gap-1">
+                👁️ Lihat Saja
+              </span>
             )}
             <span className="px-2.5 py-1 bg-navy/10 text-navy rounded-full font-bold">
               {tournament.activeDivisions.length} Divisi Aktif
@@ -579,7 +621,7 @@ export default function App() {
           )}
 
           {selectedMenu === 'config' && (
-            <TournamentConfig tournament={tournament} onChange={handleTournamentUpdate} />
+            <TournamentConfig tournament={tournament} onChange={handleTournamentUpdate} isAdmin={isAdmin} />
           )}
 
           {selectedMenu === 'div-detail' && currentDiv && (
@@ -643,6 +685,7 @@ export default function App() {
                     division={currentDiv}
                     isDouble={isDouble}
                     onUpdateDivision={handleUpdateDivision}
+                    isAdmin={isAdmin}
                   />
                 )}
 
@@ -650,6 +693,7 @@ export default function App() {
                   <DivisionGroups
                     division={currentDiv}
                     onUpdateDivision={handleUpdateDivision}
+                    isAdmin={isAdmin}
                   />
                 )}
 
@@ -657,6 +701,7 @@ export default function App() {
                   <DivisionRoundRobin
                     division={currentDiv}
                     onUpdateDivision={handleUpdateDivision}
+                    isAdmin={isAdmin}
                   />
                 )}
 
@@ -664,6 +709,7 @@ export default function App() {
                   <DivisionKnockout
                     division={currentDiv}
                     onUpdateDivision={handleUpdateDivision}
+                    isAdmin={isAdmin}
                   />
                 )}
               </div>

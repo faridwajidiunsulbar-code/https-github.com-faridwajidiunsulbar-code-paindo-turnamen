@@ -11,9 +11,10 @@ import { Trophy, Check, Edit3, Lock, Unlock, Play, HelpCircle, ChevronRight, Ale
 interface DivisionKnockoutProps {
   division: Division;
   onUpdateDivision: (updated: Division) => void;
+  isAdmin?: boolean;
 }
 
-export default function DivisionKnockout({ division, onUpdateDivision }: DivisionKnockoutProps) {
+export default function DivisionKnockout({ division, onUpdateDivision, isAdmin = true }: DivisionKnockoutProps) {
   const { entries, groups, roundRobinMatches, settings, knockoutStage, champions } = division;
 
   // Seeding local selection before locking
@@ -396,16 +397,23 @@ export default function DivisionKnockout({ division, onUpdateDivision }: Divisio
                   Rekomendasi Peserta Lolos Fase Grup
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Berikut adalah rekomendasi otomatis dari grup stage. Anda dapat meninjau, mengonfirmasi, dan menyusun seeding bracket setelahnya.
+                  Berikut adalah rekomendasi otomatis dari grup stage. {isAdmin ? 'Anda dapat meninjau, mengonfirmasi, dan menyusun seeding bracket setelahnya.' : 'Fase Gugur belum dimulai oleh admin turnamen.'}
                 </p>
               </div>
-              <button
-                onClick={handleStartSeedingSetup}
-                className="px-4 py-2 bg-navy hover:bg-navy-light text-neon rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 card-shadow self-start sm:self-center"
-                id="view-qualifiers-button"
-              >
-                <ChevronRight className="h-4 w-4 text-neon" /> Mulai Penyusunan Bracket
-              </button>
+              {isAdmin ? (
+                <button
+                  onClick={handleStartSeedingSetup}
+                  className="px-4 py-2 bg-navy hover:bg-navy-light text-neon rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 card-shadow self-start sm:self-center"
+                  id="view-qualifiers-button"
+                >
+                  <ChevronRight className="h-4 w-4 text-neon" /> Mulai Penyusunan Bracket
+                </button>
+              ) : (
+                <div className="bg-slate-50 border border-slate-150 rounded-xl p-3 text-xs text-slate-500 flex items-center gap-2 max-w-sm">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                  <span>Fase gugur belum dimulai. Di bawah ini adalah proyeksi klasemen sementara.</span>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="standings-rec-grid">
@@ -458,7 +466,7 @@ export default function DivisionKnockout({ division, onUpdateDivision }: Divisio
           </div>
 
           {/* Seed configuration inputs before Generating */}
-          {selectedSeeds.length > 0 && (
+          {isAdmin && selectedSeeds.length > 0 && (
             <div className="bg-white rounded-2xl border border-slate-150 p-6 card-shadow space-y-6" id="seeding-setup-panel">
               <div className="pb-3 border-b border-slate-150">
                 <h4 className="font-extrabold text-navy text-sm">Sesuaikan Seed/Penempatan Slot Bracket</h4>
@@ -525,53 +533,55 @@ export default function DivisionKnockout({ division, onUpdateDivision }: Divisio
                 </h3>
                 <p className="text-[11px] text-slate-450">
                   {knockoutStage.isLocked 
-                    ? 'Hasil pertandingan sedang dimainkan. Klik kotak pertandingan untuk mencatat skor.' 
-                    : 'Anda masih bisa menukar seed atau mengatur bye. Klik kunci bracket untuk memulai pertandingan.'}
+                    ? (isAdmin ? 'Hasil pertandingan sedang dimainkan. Klik kotak pertandingan untuk mencatat skor.' : 'Hasil pertandingan fase gugur sedang berlangsung.')
+                    : (isAdmin ? 'Anda masih bisa menukar seed atau mengatur bye. Klik kunci bracket untuk memulai pertandingan.' : 'Bracket draf sedang dipersiapkan oleh admin.')}
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-2 shrink-0">
-              {!knockoutStage.isLocked ? (
-                <>
-                  <button
-                    onClick={handleLockBracket}
-                    className="px-4 py-2 bg-navy hover:bg-navy-light text-neon rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 card-shadow"
-                    id="lock-bracket-button"
-                  >
-                    <Lock className="h-3.5 w-3.5 text-neon" /> Kunci Bracket & Mainkan
-                  </button>
-                  <button
-                    onClick={handleResetKnockout}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
-                    id="reset-bracket-button"
-                  >
-                    Reset Ulang
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={handleUnlockBracket}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
-                    id="unlock-bracket-button"
-                  >
-                    <Unlock className="h-3.5 w-3.5" /> Buka Kunci Bracket
-                  </button>
-                  <button
-                    onClick={handleResetKnockout}
-                    className="px-4 py-2 bg-slate-100 hover:bg-rose-50 text-rose-650 rounded-xl text-xs font-bold transition"
-                    id="reset-bracket-button-locked"
-                  >
-                    Reset Ulang
-                  </button>
-                </>
-              )}
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2 shrink-0">
+                {!knockoutStage.isLocked ? (
+                  <>
+                    <button
+                      onClick={handleLockBracket}
+                      className="px-4 py-2 bg-navy hover:bg-navy-light text-neon rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 card-shadow"
+                      id="lock-bracket-button"
+                    >
+                      <Lock className="h-3.5 w-3.5 text-neon" /> Kunci Bracket & Mainkan
+                    </button>
+                    <button
+                      onClick={handleResetKnockout}
+                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
+                      id="reset-bracket-button"
+                    >
+                      Reset Ulang
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleUnlockBracket}
+                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                      id="unlock-bracket-button"
+                    >
+                      <Unlock className="h-3.5 w-3.5" /> Buka Kunci Bracket
+                    </button>
+                    <button
+                      onClick={handleResetKnockout}
+                      className="px-4 py-2 bg-slate-100 hover:bg-rose-50 text-rose-650 rounded-xl text-xs font-bold transition"
+                      id="reset-bracket-button-locked"
+                    >
+                      Reset Ulang
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* DRAFT MODE SEEDING SWAP FORM (IF NOT LOCKED) */}
-          {!knockoutStage.isLocked && (
+          {isAdmin && !knockoutStage.isLocked && (
             <div className="bg-slate-50 border border-slate-150 rounded-2xl p-5 space-y-4 card-shadow" id="draft-seeding-swap-panel">
               <span className="text-xs font-extrabold text-navy uppercase tracking-wider block">
                 Sesuaikan Ulang Seeding Slot (Draft Mode)
@@ -633,10 +643,10 @@ export default function DivisionKnockout({ division, onUpdateDivision }: Divisio
                           <div
                             key={m.id}
                             onClick={() => {
-                              if (isPlayable) openKoScoreModal(m);
+                              if (isPlayable && isAdmin) openKoScoreModal(m);
                             }}
                             className={`p-3 bg-white border border-slate-150 rounded-xl card-shadow text-xs transition-all relative ${
-                              isPlayable 
+                              isPlayable && isAdmin
                                 ? 'cursor-pointer hover:border-neon/40 hover:shadow-md' 
                                 : 'opacity-80'
                             }`}
@@ -705,10 +715,10 @@ export default function DivisionKnockout({ division, onUpdateDivision }: Divisio
                       <div
                         key={m.id}
                         onClick={() => {
-                          if (isPlayable) openKoScoreModal(m);
+                          if (isPlayable && isAdmin) openKoScoreModal(m);
                         }}
                         className={`p-3 bg-white border border-slate-200 rounded-xl text-xs transition-all card-shadow ${
-                          isPlayable 
+                          isPlayable && isAdmin
                             ? 'cursor-pointer hover:border-amber-500' 
                             : 'opacity-85'
                         }`}

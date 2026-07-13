@@ -45,6 +45,15 @@ const cleanEntryId = (id: string | null | undefined): string | null => {
   return id;
 };
 
+// Helper to check if entry ID is valid and exists in current division's entries
+const getValidEntryId = (id: string | null | undefined, validEntryIds: Set<string>): string | null => {
+  const cleaned = cleanEntryId(id);
+  if (cleaned && validEntryIds.has(cleaned)) {
+    return cleaned;
+  }
+  return null;
+};
+
 // Save/Sync a complete tournament tree to the relational database
 export async function saveTournamentToSupabase(tournament: Tournament): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
@@ -171,9 +180,10 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
         // 7. Insert Group Members
         const allGroupMembers: any[] = [];
         tournament.activeDivisions.forEach(div => {
+          const validEntryIds = new Set(div.entries.map(e => e.id));
           div.groups.forEach(g => {
             g.entryIds.forEach(entId => {
-              const cleanedId = cleanEntryId(entId);
+              const cleanedId = getValidEntryId(entId, validEntryIds);
               if (cleanedId) {
                 allGroupMembers.push({
                   group_id: g.id,
@@ -193,6 +203,8 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
       // 8. Insert Matches (Round Robin + Knockout)
       const allMatches: any[] = [];
       tournament.activeDivisions.forEach(div => {
+        const validEntryIds = new Set(div.entries.map(e => e.id));
+
         // Round Robin Matches
         div.roundRobinMatches.forEach((m, index) => {
           // Find group id by name
@@ -205,12 +217,12 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
             stage: 'round_robin',
             round: m.groupName || 'Round Robin',
             match_no: m.matchNum || index + 1,
-            entry_a_id: cleanEntryId(m.entryId1),
-            entry_b_id: cleanEntryId(m.entryId2),
+            entry_a_id: getValidEntryId(m.entryId1, validEntryIds),
+            entry_b_id: getValidEntryId(m.entryId2, validEntryIds),
             score_a: m.score1,
             score_b: m.score2,
-            winner_entry_id: cleanEntryId(m.winnerId),
-            loser_entry_id: cleanEntryId(m.loserId),
+            winner_entry_id: getValidEntryId(m.winnerId, validEntryIds),
+            loser_entry_id: getValidEntryId(m.loserId, validEntryIds),
             status: m.status === 'selesai' ? 'completed' : (m.status === 'walkover' ? 'walkover' : 'scheduled'),
             is_walkover: m.status === 'walkover'
           });
@@ -227,12 +239,12 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
               stage: m.isBronzeMatch ? 'bronze' : (m.roundName === 'Final' ? 'final' : 'knockout'),
               round: m.roundName || 'Knockout',
               match_no: m.matchNum || index + 100,
-              entry_a_id: cleanEntryId(m.entryId1),
-              entry_b_id: cleanEntryId(m.entryId2),
+              entry_a_id: getValidEntryId(m.entryId1, validEntryIds),
+              entry_b_id: getValidEntryId(m.entryId2, validEntryIds),
               score_a: m.score1,
               score_b: m.score2,
-              winner_entry_id: cleanEntryId(m.winnerId),
-              loser_entry_id: cleanEntryId(m.loserId),
+              winner_entry_id: getValidEntryId(m.winnerId, validEntryIds),
+              loser_entry_id: getValidEntryId(m.loserId, validEntryIds),
               status: m.status === 'selesai' ? 'completed' : (m.status === 'walkover' ? 'walkover' : 'scheduled'),
               is_walkover: m.status === 'walkover',
               next_match_id: null, // set later if needed, or simple direct state tracking
@@ -249,13 +261,14 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
       // 9. Insert Knockout Slots (Qualified entry rankings/seeds)
       const allKnockoutSlots: any[] = [];
       tournament.activeDivisions.forEach(div => {
+        const validEntryIds = new Set(div.entries.map(e => e.id));
         if (div.knockoutStage && div.knockoutStage.confirmedEntryIds) {
           div.knockoutStage.confirmedEntryIds.forEach((entId, idx) => {
             allKnockoutSlots.push({
               tournament_id: tournament.id,
               division_id: div.id,
               seed_no: idx + 1,
-              entry_id: cleanEntryId(entId),
+              entry_id: getValidEntryId(entId, validEntryIds),
               source_label: `Seed ${idx + 1}`,
               is_wildcard: false,
               is_bye: entId === 'BYE'
@@ -272,14 +285,15 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
       // 10. Insert Champions
       const allChampions: any[] = [];
       tournament.activeDivisions.forEach(div => {
+        const validEntryIds = new Set(div.entries.map(e => e.id));
         if (div.champions) {
           allChampions.push({
             id: `c-${div.id}`,
             tournament_id: tournament.id,
             division_id: div.id,
-            champion_entry_id: cleanEntryId(div.champions.firstPlaceEntryId),
-            runner_up_entry_id: cleanEntryId(div.champions.secondPlaceEntryId),
-            third_place_entry_id: cleanEntryId(div.champions.thirdPlaceEntryId)
+            champion_entry_id: getValidEntryId(div.champions.firstPlaceEntryId, validEntryIds),
+            runner_up_entry_id: getValidEntryId(div.champions.secondPlaceEntryId, validEntryIds),
+            third_place_entry_id: getValidEntryId(div.champions.thirdPlaceEntryId, validEntryIds)
           });
         }
       });
@@ -291,8 +305,11 @@ export async function saveTournamentToSupabase(tournament: Tournament): Promise<
     }
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to save tournament to Supabase:', err);
+    if (typeof window !== 'undefined') {
+      (window as any).lastSupabaseError = err?.message || err?.details || JSON.stringify(err);
+    }
     return false;
   }
 }
@@ -510,7 +527,8 @@ export async function loadTournamentFromSupabase(tournamentId: string): Promise<
       location: tData.location || '',
       events,
       ageGroups,
-      activeDivisions: activeDivisions
+      activeDivisions: activeDivisions,
+      ownerId: tData.owner_id
     };
 
     return reconstructedTournament;

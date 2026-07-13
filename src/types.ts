@@ -99,6 +99,7 @@ export interface Tournament {
   events: TournamentEvent[];
   ageGroups: AgeGroup[];
   activeDivisions: Division[];
+  ownerId?: string;
 }
 
 export interface GroupStandingRow {

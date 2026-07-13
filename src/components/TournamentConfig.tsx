@@ -10,9 +10,10 @@ import { Settings, Plus, Trash2, CheckSquare, Square, Calendar, MapPin, Award } 
 interface TournamentConfigProps {
   tournament: Tournament;
   onChange: (updated: Tournament) => void;
+  isAdmin?: boolean;
 }
 
-export default function TournamentConfig({ tournament, onChange }: TournamentConfigProps) {
+export default function TournamentConfig({ tournament, onChange, isAdmin = true }: TournamentConfigProps) {
   const [newEventName, setNewEventName] = useState('');
   const [newEventIsDouble, setNewEventIsDouble] = useState(true);
   
@@ -204,6 +205,16 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
 
   return (
     <div className="space-y-8 animate-fade-in" id="tournament-config">
+      {!isAdmin && (
+        <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-start gap-3 text-sm">
+          <span className="text-xl">👁️</span>
+          <div>
+            <p className="font-extrabold text-amber-900">Mode Lihat Saja (Publik)</p>
+            <p className="text-xs text-amber-700 mt-0.5">Anda sedang membuka turnamen ini melalui tautan publik. Anda dapat melihat pengaturan divisi dan matriks ini, namun tidak dapat melakukan perubahan kecuali Anda login sebagai admin penyelenggara.</p>
+          </div>
+        </div>
+      )}
+
       {/* 1. General Tournament Details */}
       <section className="bg-white rounded-2xl border border-slate-150 p-6 card-shadow" id="general-info-section">
         <h2 className="text-base font-extrabold text-navy mb-4 flex items-center gap-2">
@@ -219,7 +230,8 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
               value={tournament.name}
               onChange={(e) => updateGeneral('name', e.target.value)}
               placeholder="Contoh: Pickleball Championship Cup"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-slate-800 font-medium transition"
+              disabled={!isAdmin}
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-slate-800 font-medium transition disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
             />
           </div>
           <div className="space-y-1">
@@ -231,7 +243,8 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
                 id="tournament-date-input"
                 value={tournament.date}
                 onChange={(e) => updateGeneral('date', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-slate-800 font-medium transition"
+                disabled={!isAdmin}
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-slate-800 font-medium transition disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -245,7 +258,8 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
                 value={tournament.location}
                 onChange={(e) => updateGeneral('location', e.target.value)}
                 placeholder="Contoh: Gading Serpong, Tangerang"
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-slate-800 font-medium transition"
+                disabled={!isAdmin}
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-slate-800 font-medium transition disabled:bg-slate-50 disabled:text-slate-450 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -261,34 +275,36 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
             Nomor Pertandingan
           </h3>
           
-          <form onSubmit={addEvent} className="flex gap-2 mb-6" id="add-event-form">
-            <div className="flex-1 flex flex-col md:flex-row gap-2">
-              <input
-                type="text"
-                id="new-event-name-input"
-                value={newEventName}
-                onChange={(e) => setNewEventName(e.target.value)}
-                placeholder="Tambah Nomor (Contoh: Ganda Campuran)"
-                className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-sm text-slate-800 transition"
-              />
-              <select
-                id="new-event-type-select"
-                value={newEventIsDouble ? 'double' : 'single'}
-                onChange={(e) => setNewEventIsDouble(e.target.value === 'double')}
-                className="px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-sm text-slate-700 bg-slate-50 transition"
+          {isAdmin && (
+            <form onSubmit={addEvent} className="flex gap-2 mb-6" id="add-event-form">
+              <div className="flex-1 flex flex-col md:flex-row gap-2">
+                <input
+                  type="text"
+                  id="new-event-name-input"
+                  value={newEventName}
+                  onChange={(e) => setNewEventName(e.target.value)}
+                  placeholder="Tambah Nomor (Contoh: Ganda Campuran)"
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-sm text-slate-800 transition"
+                />
+                <select
+                  id="new-event-type-select"
+                  value={newEventIsDouble ? 'double' : 'single'}
+                  onChange={(e) => setNewEventIsDouble(e.target.value === 'double')}
+                  className="px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-sm text-slate-700 bg-slate-50 transition"
+                >
+                  <option value="double">Ganda (2 Pemain)</option>
+                  <option value="single">Tunggal (1 Pemain)</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                id="add-event-submit-button"
+                className="px-4 py-2.5 bg-navy hover:bg-navy-light text-neon rounded-lg font-extrabold transition flex items-center gap-1 shrink-0 text-sm card-shadow"
               >
-                <option value="double">Ganda (2 Pemain)</option>
-                <option value="single">Tunggal (1 Pemain)</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              id="add-event-submit-button"
-              className="px-4 py-2.5 bg-navy hover:bg-navy-light text-neon rounded-lg font-extrabold transition flex items-center gap-1 shrink-0 text-sm card-shadow"
-            >
-              <Plus className="h-4 w-4" /> Add
-            </button>
-          </form>
+                <Plus className="h-4 w-4" /> Add
+              </button>
+            </form>
+          )}
 
           <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1" id="events-list">
             {tournament.events.map((ev) => (
@@ -299,7 +315,7 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
                     {ev.isDouble ? 'Ganda' : 'Tunggal'}
                   </span>
                 </div>
-                {tournament.events.length > 1 && (
+                {isAdmin && tournament.events.length > 1 && (
                   <button
                     onClick={() => removeEvent(ev.id)}
                     className="p-1 text-slate-400 hover:text-rose-500 rounded transition"
@@ -321,29 +337,31 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
             Kelompok Umur (KU)
           </h3>
           
-          <form onSubmit={addAgeGroup} className="flex gap-2 mb-6" id="add-age-group-form">
-            <input
-              type="text"
-              id="new-age-group-name-input"
-              value={newAgeGroupName}
-              onChange={(e) => setNewAgeGroupName(e.target.value)}
-              placeholder="Tambah KU (Contoh: 45+, Amatir, Open)"
-              className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-sm text-slate-800 transition"
-            />
-            <button
-              type="submit"
-              id="add-age-group-submit-button"
-              className="px-4 py-2.5 bg-navy hover:bg-navy-light text-neon rounded-lg font-extrabold transition flex items-center gap-1 shrink-0 text-sm card-shadow"
-            >
-              <Plus className="h-4 w-4" /> Add
-            </button>
-          </form>
+          {isAdmin && (
+            <form onSubmit={addAgeGroup} className="flex gap-2 mb-6" id="add-age-group-form">
+              <input
+                type="text"
+                id="new-age-group-name-input"
+                value={newAgeGroupName}
+                onChange={(e) => setNewAgeGroupName(e.target.value)}
+                placeholder="Tambah KU (Contoh: 45+, Amatir, Open)"
+                className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy text-sm text-slate-800 transition"
+              />
+              <button
+                type="submit"
+                id="add-age-group-submit-button"
+                className="px-4 py-2.5 bg-navy hover:bg-navy-light text-neon rounded-lg font-extrabold transition flex items-center gap-1 shrink-0 text-sm card-shadow"
+              >
+                <Plus className="h-4 w-4" /> Add
+              </button>
+            </form>
+          )}
 
           <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1" id="age-groups-list">
             {tournament.ageGroups.map((ag) => (
               <div key={ag.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-150 text-sm" id={`age-group-row-${ag.id}`}>
                 <span className="font-semibold text-slate-700">{ag.name}</span>
-                {tournament.ageGroups.length > 1 && (
+                {isAdmin && tournament.ageGroups.length > 1 && (
                   <button
                     onClick={() => removeAgeGroup(ag.id)}
                     className="p-1 text-slate-400 hover:text-rose-500 rounded transition"
@@ -400,12 +418,13 @@ export default function TournamentConfig({ tournament, onChange }: TournamentCon
                       <td key={ag.id} className="p-4 text-center">
                         <button
                           type="button"
-                          onClick={() => toggleDivision(ev, ag)}
+                          onClick={() => isAdmin && toggleDivision(ev, ag)}
+                          disabled={!isAdmin}
                           className={`inline-flex items-center justify-center p-2 rounded-lg transition-all ${
                             isActive
                               ? 'text-navy bg-neon/15 border border-neon/40'
                               : 'text-slate-300 hover:text-slate-500 hover:bg-slate-100 border border-slate-200'
-                          }`}
+                          } disabled:opacity-75 disabled:cursor-not-allowed`}
                           id={`matrix-checkbox-${ev.id}-${ag.id}`}
                         >
                           {isActive ? (
